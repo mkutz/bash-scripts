@@ -12,4 +12,5 @@ Some usefull scripts written in [Bash](https://www.gnu.org/software/bash/).
 ## Config Stuff
 
 * [bashrc](bashrc) is my heavily personalized `~/.bashrc` file. Please note that you will need to install [Bash-Preexec](https://github.com/rcaloras/bash-preexec) for it to work.
+* [bash_aliases](bash_aliases) is my `~/.bash_aliases` containing a collection of aliases.
 * [inputrc](inputrc) is my `~/.inputrc` enabeling type ahead seach using arrow keys. E.g. type "`git commit`" and press up and you will find the latest `git commit` command in your did execute.
