@@ -1,0 +1,89 @@
+#!/bin/bash
+
+#
+# switches your maven settings.xml files using a _postfix as parameter
+#
+
+M2_DIR="${HOME}/.m2"
+SETTINGS_FILE="${M2_DIR}/settings.xml"
+USAGE="$(basename $0)"
+IFS=$'\n'
+SETTINGS_FILES=($(find $HOME/.m2/ -type f -name "settings_*.xml"))
+
+HIDDEN='\e[8m'
+RESET='\e[0m'
+
+function file_to_option {
+    local file=$1
+    local option="${file}"
+    option="${option##*/settings_}"
+    option="${option%%.xml}"
+    echo "${option}"
+}
+
+function option_to_file {
+    local option=$1
+    local file="${M2_DIR}/settings_${option}.xml"
+    echo "${file}"
+}
+
+function get_selected_option {
+    local selected_option=$(readlink "${SETTINGS_FILE}")
+    echo "$(file_to_option ${selected_option})"
+}
+
+function is_selected_option {
+    local option=$1
+    if [[ "${option}" = "$(get_selected_option)" ]]; then
+        return 0
+    fi
+    return 1
+}
+
+function print_usage {
+    echo "USAGE:"
+
+    i=0
+    for file in "${SETTINGS_FILES[@]}"
+    do
+        if [[ $i -eq 0 ]]; then
+            echo -ne "${HIDDEN}${USAGE}${RESET} ⎧ "
+        elif [[ $i -eq $((${#SETTINGS_FILES[@]}/2)) ]]; then
+            echo -ne "${USAGE} ⎨ "
+        elif [[ $i -eq $((${#SETTINGS_FILES[@]}-1)) ]]; then
+            echo -ne "${HIDDEN}${USAGE}${RESET} ⎩ "
+        else
+            echo -ne "${HIDDEN}${USAGE}${RESET} ⎪ "
+        fi
+        option="$(file_to_option ${file})"
+        echo -ne "${option}"
+        if is_selected_option "${option}"; then
+            echo -ne "*"
+        fi
+        echo -ne "\n"
+
+        i=$((i+1))
+    done
+}
+
+# handle parameters
+if ! [ $# -eq 1 ]; then
+    echo "$(print_usage)"
+    exit 1
+else
+    NEW_SETTINGS="$(option_to_file $1)"
+    if ! [ -f ${NEW_SETTINGS} ]; then
+        echo "${NEW_SETTINGS} does not exist"
+        exit 1
+    fi
+fi
+
+
+# backup current settings if no symlink
+if [ ! -h "${SETTINGS_FILE}" ]; then
+    cp "${SETTINGS_FILE}" "${M2_DIR}/settings_$(date +'%Y-%m-%d_%H-%M-%S').xml"
+fi
+
+# remove old settings and set new link
+rm -f "${SETTINGS_FILE}" && ln -s "${NEW_SETTINGS}" "${SETTINGS_FILE}"
+exit 0
