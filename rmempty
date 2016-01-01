@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+#
+# deletes all empty directories below this one
+#
+
+find . -type d -empty -delete
