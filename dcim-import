@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+
+#
+# 1) This scripts search all image and video files on the current folder and recursively.
+# 2) Then, all files will be renamed using the creation time stamp found by exiv2 or ffprobe.
+# 3) All files will be sorted into folders, which names are the date of the files in that folder.
+#
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+export BOLD='\e[1m'
+export DIM='\e[2m'
+export UNDERLINE='\e[4m'
+export INVERTED='\e[7m'
+export HIDDEN='\e[8m'
+
+export RESET='\e[0m'
+
+export WHITE='\e[1;37m'
+export BLACK='\e[0;30m'
+export BLUE='\e[0;34m'
+export LIGHT_BLUE='\e[1;34m'
+export GREEN='\e[0;32m'
+export LIGHT_GREEN='\e[1;32m'
+export CYAN='\e[0;36m'
+export LIGHT_CYAN='\e[1;36m'
+export RED='\e[0;31m'
+export LIGHT_RED='\e[1;31m'
+export PURPLE='\e[0;35m'
+export LIGHT_PURPLE='\e[1;35m'
+export BROWN='\e[0;33m'
+export YELLOW='\e[1;33m'
+export GRAY='\e[0;30m'
+export LIGHT_GRAY='\e[0;37m'
+
+export SYMBOL_PHOTO="📷"
+export SYMBOL_VIDEO="🎥"
+
+
+EXTENSIONS_PHOTO=( "jpeg" "jpg" "png" "nef" "cr2" )
+EXTENSIONS_VIDEO=( "avi" "mp4" "mov" "3gp" )
+
+# Check if dependecy command exists
+command -v exiv2 >/dev/null 2>&1 || { echo >&2 "I require exiv2 but it's not installed.  Aborting."; exit 1; }
+command -v mediainfo >/dev/null 2>&1 || { echo >&2 "I require mediainfo but it's not installed.  Aborting."; exit 1; }
+command -v exiftran >/dev/null 2>&1 || { echo >&2 "I require exiftran but it's not installed.  Aborting."; exit 1; }
+
+
+function get_photo_file_name {
+    local photo_file=$1
+    local extension="${photo_file##*.}"
+    local time_stamp="$(exiv2 -g Exif.Image.DateTime -Pv ${photo_file} 2>/dev/null)"
+    time_stamp="${time_stamp:0:4}-${time_stamp:5:2}-${time_stamp:8:2} ${time_stamp:11}"
+    local file_name=$(TZ=CET date -d "${time_stamp}" +"%Y-%m-%d %H-%M-%S")
+    local folder_name=$(TZ=CET date -d "${time_stamp}" +"%Y-%m-%d")
+    echo "${folder_name}/${file_name}.${extension,,}"
+    return 0
+}
+
+
+function get_video_file_name {
+    local video_file=$1
+    local extension="${video_file##*.}"
+    local time_stamp=$(mediainfo "${video_file}" | grep "Encoded date" | head -n1 | cut -d: -f2-)
+    local file_name=$(TZ=CET date -d "${time_stamp}" +"%Y-%m-%d %H-%M-%S")
+    local folder_name=$(TZ=CET date -d "${time_stamp}" +"%Y-%m-%d")
+    echo "${folder_name}/${time_stamp}.${extension,,}"
+    return 0
+}
+
+function is_photo_file {
+    local file=$1
+    local extension="${file##*.}"
+    extension="${extension,,}"
+    if [[ " ${EXTENSIONS_PHOTO[@]} " =~ " ${extension} " ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function is_video_file {
+    local file=$1
+    local extension="${file##*.}"
+    extension="${extension,,}"
+    if [[ " ${EXTENSIONS_VIDEO[@]} " =~ " ${extension} " ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function get_file_name {
+    local file=$1
+    local extension="${file##*.}"
+    extension="${extension,,}"
+
+    if is_photo_file $file; then
+        echo "$(get_photo_file_name ${file})"
+    elif is_video_file $file; then
+        echo "$(get_video_file_name ${file})"
+    else
+        return 1 # unknown/unsupported file type
+    fi
+
+    return 0
+}
+
+IFS=$'\n'
+files=($(find . -type f))
+
+for file in "${files[@]}"
+do
+    echo -ne "${file}"
+    new_file_name="./$(get_file_name ${file})"
+    if [ "${file}" = "${new_file_name}" ]; then
+        echo -ne "${LIGHT_GREEN} ✔${RESET}"
+    else
+        if [ ! -d $(dirname "${new_file_name}") ]; then
+            mkdir -p $(dirname "${new_file_name}")
+        fi
+        error=$((mv "${file}" "${new_file_name}") 2>&1) && echo -ne "${LIGHT_GREEN} → ${new_file_name} ✔${RESET}" || echo -ne "${LIGHT_RED} ✘${RESET}"
+        if ( [ $? -ne 0 ] && [ ! -z ${error} ]); then
+            echo -ne "${LIGHT_RED} ${error}${RESET}"
+        fi
+        file=${new_file_name}
+    fi
+
+    if is_photo_file $file; then
+        error=$((exiftran -ai "${file}") 2>&1) && echo -ne "${LIGHT_GREEN} ↺${RESET}" || echo -ne "${LIGHT_RED} ↺${RESET}"
+        if ( [ $? -ne 0 ] && [ ! -z ${error} ]); then
+            echo -ne "${LIGHT_RED} ${error}${RESET}"
+        fi
+    fi
+
+    echo -ne "\n"
+done
+
+find . -type d -empty -delete
+
+exit 0
