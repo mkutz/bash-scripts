@@ -1,4 +1,12 @@
-"\e[A": history-search-backward
-"\e[B": history-search-forward
-"\e[C": forward-char
-"\e[D": backward-char
+"\e[A": history-search-backward # ↑
+"\e[B": history-search-forward  # ↓
+"\e[C": forward-char            # →
+"\e[D": backward-char           # ←
+
+"\e[1;5C": forward-word         # Ctrl-→
+"\e[1;5D": backward-word        # Ctrl-←
+
+"\e[3;5~": kill-word            # Ctrl-⌦
+"\e[9;3~": backward-kill-word   # Ctrl-⌫
+
+TAB: menu-complete              # ↹
