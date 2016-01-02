@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#
+# removes all local branches already merged to master
+#
+
+merged=($(git branch --merged master | grep -v "\* master"))
+
+for branch in "${merged[@]}"
+do
+	git branch -d "${branch}"
+done

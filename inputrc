@@ -7,6 +7,6 @@
 "\e[1;5D": backward-word        # Ctrl-←
 
 "\e[3;5~": kill-word            # Ctrl-⌦
-"\e[9;3~": backward-kill-word   # Ctrl-⌫
+#"\e[9;3~": backward-kill-word   # Ctrl-⌫
 
-TAB: menu-complete              # ↹
+#TAB: menu-complete              # ↹
