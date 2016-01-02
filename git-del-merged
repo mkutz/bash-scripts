@@ -8,5 +8,5 @@ merged=($(git branch --merged master | grep -v "\* master"))
 
 for branch in "${merged[@]}"
 do
-	git branch -d "${branch}"
+    git branch -d "${branch}"
 done
