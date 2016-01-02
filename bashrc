@@ -60,6 +60,11 @@ export CDPATH=.:~:~/Dokumente:~/Projekte:/media
 # Maven
 
 # Prompt
+# Example:
+# ╰▸ ✘ 130 ─ 13:38:14
+# ╭ me@host ~/projects/bash-scripts git::master ↗1 ↘1 
+# ╰▸ 
+
 if [ "$color_prompt" = yes ]; then
 
     export BOLD='\e[1m'
@@ -70,22 +75,23 @@ if [ "$color_prompt" = yes ]; then
 
     export RESET='\e[0m'
 
-    export WHITE='\e[1;37m'
-    export BLACK='\e[0;30m'
-    export BLUE='\e[0;34m'
-    export LIGHT_BLUE='\e[1;34m'
-    export GREEN='\e[0;32m'
-    export LIGHT_GREEN='\e[1;32m'
-    export CYAN='\e[0;36m'
-    export LIGHT_CYAN='\e[1;36m'
-    export RED='\e[0;31m'
-    export LIGHT_RED='\e[1;31m'
-    export PURPLE='\e[0;35m'
-    export LIGHT_PURPLE='\e[1;35m'
-    export BROWN='\e[0;33m'
-    export YELLOW='\e[1;33m'
-    export GRAY='\e[0;30m'
-    export LIGHT_GRAY='\e[0;37m'
+
+    export WHITE='\e[97m'
+    export BLACK='\e[30m'
+    export BLUE='\e[34m'
+    export LIGHT_BLUE='\e[94m'
+    export GREEN='\e[32m'
+    export LIGHT_GREEN='\e[92m'
+    export CYAN='\e[36m'
+    export LIGHT_CYAN='\e[96m'
+    export RED='\e[31m'
+    export LIGHT_RED='\e[91m'
+    export PURPLE='\e[35m'
+    export LIGHT_PURPLE='\e[95m'
+    export YELLOW='\e[33m'
+    export LIGHT_YELLOW='\e[93m'
+    export GRAY='\e[30m'
+    export LIGHT_GRAY='\e[37m'
 
     function exitcode_marker {
         local exit_code="$1"
@@ -124,8 +130,8 @@ if [ "$color_prompt" = yes ]; then
 
     function chroot_status {
         echo -ne "${debian_chroot:+($debian_chroot)}"
-        echo -ne "${LIGHT_GREEN}\u@\h "
-        echo -ne "${LIGHT_BLUE}\w${RESET}"
+        echo -ne "${BOLD}${GREEN}\u@\h "
+        echo -ne "${BLUE}\w${RESET}"
     }
 
     function git_status {
@@ -156,13 +162,13 @@ if [ "$color_prompt" = yes ]; then
             echo -en "${BOLD}${LIGHT_PURPLE}"
             echo -en "${git_branch}${git_dirty} "
             if [ ${git_commits_ahead} -gt 0 ]; then
-                echo -en "↗ ${git_commits_ahead} "
+                echo -en "↗${git_commits_ahead} "
             fi
             if [ ${git_commits_behind} -gt 0 ]; then
-                echo -en "↘ ${git_commits_behind} "
+                echo -en "↘${git_commits_behind} "
             fi
             if [ ${git_stashed_changes} -gt 0 ]; then
-                echo -en "⇣ ${git_stashed_changes}"
+                echo -en "⇣${git_stashed_changes}"
             fi
             echo -en "${RESET}"
         fi
@@ -173,27 +179,34 @@ if [ "$color_prompt" = yes ]; then
 
         PS1=""
         if [ ! -z "${last_command}" ]; then
-            PS1+="\n" #PS1+="╰─┬$(printf "%0.s─" $(seq 1 $(($COLUMNS-4))))╯\n"
-            PS1+="╭ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n"
-            PS1+="│ $(chroot_status) $(git_status)"
+            #PS1+="╰─┬$(printf "%0.s─" $(seq 1 $(($COLUMNS-4))))╯\n"
+            PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))"
+            PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n\n"
+            PS1+="╭ $(chroot_status) $(git_status)"
         else
             PS1+="\n╭ $(chroot_status) $(git_status)"
         fi
-        PS1+="\n╰─ "
+        PS1+="\n╰▸ "
 
         PS2=""
-        PS2+="\e[s\e[1A├\e[u"
-        PS2+="╰─ "
+        PS2+="\e[s\e[1A├▹ \e[u"
+        PS2+="╰▸ "
     }
 
     function save_last_command {
         export last_command="$1"
     }
 
+    function before_output {
+        #echo -en "\e[s\e[1A\e[$((${#last_command}+2+1))C ⮧\e[u\n"
+        echo -en "\e[s\e[1A├▸ \e[u"
+        echo -en "└$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))"
+    }
+
     precmd_functions+=(propt_command)
     preexec_functions+=(save_last_command)
+    preexec_functions+=(before_output)
     #preexec_functions+=(print_command_brace)
-
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
@@ -229,3 +242,6 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
+
+# added by travis gem
+[ -f /home/mkutz/.travis/travis.sh ] && source /home/mkutz/.travis/travis.sh
