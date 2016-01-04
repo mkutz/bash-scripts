@@ -180,7 +180,7 @@ if [ "$color_prompt" = yes ]; then
         PS1=""
         if [ ! -z "${last_command}" ]; then
             #PS1+="╰─┬$(printf "%0.s─" $(seq 1 $(($COLUMNS-4))))╯\n"
-            PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))"
+            PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
             PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n\n"
             PS1+="╭ $(chroot_status) $(git_status)"
         else
@@ -190,7 +190,7 @@ if [ "$color_prompt" = yes ]; then
 
         PS2=""
         PS2+="\e[s\e[1A├▹ \e[u"
-        PS2+="╰▸ "
+        PS2+="\n╰▸ "
     }
 
     function save_last_command {
@@ -200,7 +200,7 @@ if [ "$color_prompt" = yes ]; then
     function before_output {
         #echo -en "\e[s\e[1A\e[$((${#last_command}+2+1))C ⮧\e[u\n"
         echo -en "\e[s\e[1A├▸ \e[u"
-        echo -en "└$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))"
+        echo -en "└$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
     }
 
     precmd_functions+=(propt_command)
