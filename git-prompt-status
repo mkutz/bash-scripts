@@ -5,8 +5,6 @@
 # to be added to ones PS1
 #
 
-merged=($(git branch --merged master | grep -v "\* master"))
-
 function git_status {
     if [[ $(git status &>/dev/null) -eq 0 ]]; then
         local branch
