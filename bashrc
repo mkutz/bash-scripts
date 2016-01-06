@@ -107,90 +107,20 @@ if [ "$color_prompt" = yes ]; then
         return 1
     }
 
-    function print_command_brace {
-        local current_command="$1"
-        local length=${#current_command}
-        local half_length=$((${length}/2))
-        local rest_length=$((${length}-${half_length}))
-        
-        if [ ${length} -gt 3 ]; then
-            echo -ne "  ╰$(printf "%0.s─" $(seq 1 $(($half_length-1))))┬$(printf "%0.s─" $(seq 1 $rest_length))╯\n"
-            echo -ne "╭──$(printf "%0.s─" $(seq 1 $(($half_length-1))))┴$(printf "%0.s─" $(seq 1 $(($COLUMNS-(4+$half_length)))))╮\n"
-        elif [ ${length} -eq 3 ]; then
-            echo -ne "  ╰─┬─╯\n"
-            echo -ne "╭───┴$(printf "%0.s─" $(seq 1 $(($COLUMNS-6))))╮\n"
-        elif [ ${length} -eq 2 ]; then
-            echo -ne "  ╰┬─╯\n"
-            echo -ne "╭──┴$(printf "%0.s─" $(seq 1 $(($COLUMNS-5))))╮\n"
-        else
-            echo -ne "  ╰┬╯\n"
-            echo -ne "╭──┴$(printf "%0.s─" $(seq 1 $(($COLUMNS-5))))╮\n"
-        fi
-    }
-
-    function chroot_status {
-        echo -ne "${debian_chroot:+($debian_chroot)}"
-        echo -ne "${BOLD}${GREEN}\u@\h "
-        echo -ne "${BLUE}\w${RESET}"
-    }
-
-    function git_status {
-        if [ -d .git ]; then
-            local branch
-            if branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null); then
-                if [[ "$branch" == "HEAD" ]]; then
-                    branch='detached*'
-                fi
-                git_branch="git::$branch"
-            else
-                git_branch=""
-            fi
-
-            local status=$(git status --porcelain 2> /dev/null)
-            if [[ "$status" != "" ]]; then
-                git_dirty="*"
-            else
-                git_dirty=""
-            fi
-
-            local git_stashed_changes=$(git stash list | wc -l)
-
-            #git fetch 2> /dev/null
-            local git_commits_ahead=$(git rev-list @{u}.. --count)
-            local git_commits_behind=$(git rev-list ..@{u} --count)
-
-            echo -en "${BOLD}${LIGHT_PURPLE}"
-            echo -en "${git_branch}${git_dirty} "
-            if [ ${git_commits_ahead} -gt 0 ]; then
-                echo -en "↗${git_commits_ahead} "
-            fi
-            if [ ${git_commits_behind} -gt 0 ]; then
-                echo -en "↘${git_commits_behind} "
-            fi
-            if [ ${git_stashed_changes} -gt 0 ]; then
-                echo -en "⇣${git_stashed_changes}"
-            fi
-            echo -en "${RESET}"
-        fi
-    }
-
     function propt_command {
         local exit_code="$?"
 
         PS1=""
         if [ ! -z "${last_command}" ]; then
-            #PS1+="╰─┬$(printf "%0.s─" $(seq 1 $(($COLUMNS-4))))╯\n"
             PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
-            PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n\n"
-            PS1+="╭ $(chroot_status) $(git_status)"
-        else
-            PS1+="\n╭ $(chroot_status) $(git_status)"
+            PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n"
         fi
+        PS1+="\n╭ ${BOLD}${GREEN}\u@\h${RESET} ${BOLD}${BLUE}\w${RESET} ${BOLD}${LIGHT_PURPLE}$(git prompt-status)${RESET}"
         PS1+="\n╰▸ "
 
         PS2=""
-        PS2+="\e[s\e[1A├▹ \e[u"
-        PS2+="\n╰▸ "
+        PS2+="\e[s\e[1A├─ \e[u"
+        PS2+="╰▸ "
     }
 
     function save_last_command {
@@ -198,8 +128,7 @@ if [ "$color_prompt" = yes ]; then
     }
 
     function before_output {
-        #echo -en "\e[s\e[1A\e[$((${#last_command}+2+1))C ⮧\e[u\n"
-        echo -en "\e[s\e[1A├▸ \e[u"
+        echo -en "\e[s\e[1A├─ \e[u"
         echo -en "└$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
     }
 
