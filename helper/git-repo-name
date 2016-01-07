@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#
+# prints the current repos top level directory name
+#
+
+if git is-repo; then
+	echo $(basename $(git rev-parse --show-toplevel))
+	exit 0
+fi
+exit 1
