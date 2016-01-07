@@ -4,9 +4,13 @@
 # removes all local branches already merged to master
 #
 
-merged=($(git branch --merged master | grep -v "\* master"))
+if git is-repo; then
+	return 1
+fi
 
+merged=($(git branch --merged master | grep -v "\* master"))
 for branch in "${merged[@]}"
 do
     git branch -d "${branch}"
 done
+exit 0

@@ -5,45 +5,41 @@
 # to be added to ones PS1
 #
 
-function is_git_repo {
-	result=$(git status >/dev/null 2>&1)
-	return $?
-}
 function git_prompt_status {
-    if is_git_repo; then
-        local branch
-        if branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null); then
-            if [[ "$branch" == "HEAD" ]]; then
-                branch='detached*'
-            fi
-            git_branch="git::$branch"
-        else
-            git_branch=""
+    local branch
+    if branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null); then
+        if [[ "$branch" == "HEAD" ]]; then
+            branch='detached*'
         fi
+        git_branch="git::$branch"
+    else
+        git_branch=""
+    fi
 
-        local status=$(git status --porcelain 2> /dev/null)
-        if [[ "$status" != "" ]]; then
-            git_dirty="*"
-        else
-            git_dirty=""
-        fi
+    local status=$(git status --porcelain 2> /dev/null)
+    if [[ "$status" != "" ]]; then
+        git_dirty="*"
+    else
+        git_dirty=""
+    fi
 
-        local git_stashed_changes=$(git stash list | wc -l)
+    local git_stashed_changes=$(git stash list | wc -l)
 
-        local git_commits_ahead=$(git rev-list @{u}.. --count)
-        local git_commits_behind=$(git rev-list ..@{u} --count)
+    local git_commits_ahead=$(git rev-list @{u}.. --count)
+    local git_commits_behind=$(git rev-list ..@{u} --count)
 
-        echo -en "${git_branch}${git_dirty} "
-        if [ ${git_commits_ahead} -gt 0 ]; then
-            echo -en "↗${git_commits_ahead} "
-        fi
-        if [ ${git_commits_behind} -gt 0 ]; then
-            echo -en "↘${git_commits_behind} "
-        fi
-        if [ ${git_stashed_changes} -gt 0 ]; then
-            echo -en "⇣${git_stashed_changes}"
-        fi
+    echo -en "${git_branch}${git_dirty} "
+    if [ ${git_commits_ahead} -gt 0 ]; then
+        echo -en "↗${git_commits_ahead} "
+    fi
+    if [ ${git_commits_behind} -gt 0 ]; then
+        echo -en "↘${git_commits_behind} "
+    fi
+    if [ ${git_stashed_changes} -gt 0 ]; then
+        echo -en "⇣${git_stashed_changes}"
     fi
 }
 
-echo -n "$(git_prompt_status)"
+if git is-repo; then
+    echo -n "$(git_prompt_status)"
+fi
