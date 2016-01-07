@@ -4,8 +4,9 @@
 # removes all local branches already merged to master
 #
 
-if git is-repo; then
-	return 1
+if !(git is-repo); then
+    echo "No git repo."
+    exit 1
 fi
 
 merged=($(git branch --merged master | grep -v "\* master"))
