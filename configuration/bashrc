@@ -95,12 +95,24 @@ if [ "$color_prompt" = yes ]; then
 
     function exitcode_marker {
         local exit_code="$1"
-        local last_command="$2"
         if [ ! -z "${last_command}" ]; then
             if [ "${exit_code}" == 0 ]; then
-                echo -ne "${LIGHT_GREEN}${BOLD}✔ ${exit_code}${RESET}"
+                echo -ne "✔"
             else
-                echo -ne "${LIGHT_RED}${BOLD}✘ ${exit_code}${RESET}"
+                echo -ne "✘"
+            fi
+            return 0
+        fi
+        return 1
+    }
+
+    function exitcode_marker_color {
+        local exit_code="$1"
+        if [ ! -z "${last_command}" ]; then
+            if [ "${exit_code}" == 0 ]; then
+                echo -ne "${LIGHT_GREEN}${BOLD}$(exitcode_marker exit_code)${exit_code}${RESET}"
+            else
+                echo -ne "${LIGHT_RED}${BOLD}$(exitcode_marker exit_code)${exit_code}${RESET}"
             fi
             return 0
         fi
@@ -108,12 +120,12 @@ if [ "$color_prompt" = yes ]; then
     }
 
     function propt_command {
-        local exit_code="$?"
+        exit_code="$?"
 
         PS1=""
         if [ ! -z "${last_command}" ]; then
             PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
-            PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n"
+            PS1+="╰▸ $(exitcode_marker_color ${exit_code}) ─ \t\n"
         fi
         PS1+="\n╭ ${BOLD}${GREEN}\u@\h${RESET} ${BOLD}${BLUE}\w${RESET} ${BOLD}${LIGHT_PURPLE}$(git-prompt-status)${RESET}"
         PS1+="\n╰▸ "
@@ -135,16 +147,34 @@ if [ "$color_prompt" = yes ]; then
     precmd_functions+=(propt_command)
     preexec_functions+=(save_last_command)
     preexec_functions+=(before_output)
-    #preexec_functions+=(print_command_brace)
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
+function set_terminal_title_precmd {
+    echo -ne "\e]0;"
+    echo -ne "$(pwd)"
+    if [ ! -z "${last_command}" ]; then
+        echo -ne " > ${last_command}"
+        echo -ne " $(exitcode_marker ${exit_code})"
+    fi
+    echo -ne "\007"
+}
+
+function set_terminal_title_preexec {
+    local current_command="$1"
+    echo -ne "\e]0;"
+    echo -ne "$(pwd)"
+    echo -ne "${current_command} …"
+    echo -ne "\007"
+}
+
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
 xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    precmd_functions+=(set_terminal_title_precmd)
+    preexec_functions+=(set_terminal_title_preexec)
     ;;
 *)
     ;;
