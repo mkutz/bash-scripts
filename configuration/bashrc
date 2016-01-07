@@ -110,9 +110,9 @@ if [ "$color_prompt" = yes ]; then
         local exit_code="$1"
         if [ ! -z "${last_command}" ]; then
             if [ "${exit_code}" == 0 ]; then
-                echo -ne "${LIGHT_GREEN}${BOLD}$(exitcode_marker exit_code)${exit_code}${RESET}"
+                echo -ne "${LIGHT_GREEN}${BOLD}$(exitcode_marker exit_code) ${exit_code}${RESET}"
             else
-                echo -ne "${LIGHT_RED}${BOLD}$(exitcode_marker exit_code)${exit_code}${RESET}"
+                echo -ne "${LIGHT_RED}${BOLD}$(exitcode_marker exit_code) ${exit_code}${RESET}"
             fi
             return 0
         fi
@@ -156,7 +156,7 @@ function set_terminal_title_precmd {
     echo -ne "\e]0;"
     echo -ne "$(pwd)"
     if [ ! -z "${last_command}" ]; then
-        echo -ne " > ${last_command}"
+        echo -ne " | ${last_command/%\ */}"
         echo -ne " $(exitcode_marker ${exit_code})"
     fi
     echo -ne "\007"
@@ -166,7 +166,8 @@ function set_terminal_title_preexec {
     local current_command="$1"
     echo -ne "\e]0;"
     echo -ne "$(pwd)"
-    echo -ne "${current_command} …"
+    echo -ne " | ${current_command/%\ */}"
+    echo -ne " …"
     echo -ne "\007"
 }
 
