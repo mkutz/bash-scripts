@@ -115,7 +115,7 @@ if [ "$color_prompt" = yes ]; then
             PS1+="┌$(printf "%0.s─" $(seq 1 $(($COLUMNS-1))))\n"
             PS1+="╰▸ $(exitcode_marker ${exit_code} ${last_command}) ─ \t\n"
         fi
-        PS1+="\n╭ ${BOLD}${GREEN}\u@\h${RESET} ${BOLD}${BLUE}\w${RESET} ${BOLD}${LIGHT_PURPLE}$(git prompt-status)${RESET}"
+        PS1+="\n╭ ${BOLD}${GREEN}\u@\h${RESET} ${BOLD}${BLUE}\w${RESET} ${BOLD}${LIGHT_PURPLE}$(git-prompt-status)${RESET}"
         PS1+="\n╰▸ "
 
         PS2=""

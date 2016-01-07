@@ -5,8 +5,12 @@
 # to be added to ones PS1
 #
 
-function git_status {
-    if [[ $(git status &>/dev/null) -eq 0 ]]; then
+function is_git_repo {
+	result=$(git status >/dev/null 2>&1)
+	return $?
+}
+function git_prompt_status {
+    if is_git_repo; then
         local branch
         if branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null); then
             if [[ "$branch" == "HEAD" ]]; then
@@ -42,4 +46,4 @@ function git_status {
     fi
 }
 
-echo -n "$(git_status)"
+echo -n "$(git_prompt_status)"

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#
+# sets the current terminal's title to the given string
+#
+
+function set_title {
+    local title=$1
+    echo -ne "\e];${title}\007"
+}
+
+if ! [ $# -eq 1 ]; then
+    echo "USAGE: $(basename $0) <TITLE>"
+    exit 1
+fi
+
+set_title $1
+exit 0
