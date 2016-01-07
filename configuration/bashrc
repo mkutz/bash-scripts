@@ -154,7 +154,11 @@ unset color_prompt force_color_prompt
 
 function set_terminal_title_precmd {
     echo -ne "\e]0;"
-    echo -ne "$(pwd)"
+    if git is-repo; then
+        echo -ne "$(git repo-name)"
+    else
+        echo -ne "$(pwd)"
+    fi
     if [ ! -z "${last_command}" ]; then
         echo -ne " | ${last_command/%\ */}"
         echo -ne " $(exitcode_marker ${exit_code})"
@@ -165,7 +169,11 @@ function set_terminal_title_precmd {
 function set_terminal_title_preexec {
     local current_command="$1"
     echo -ne "\e]0;"
-    echo -ne "$(pwd)"
+    if git is-repo; then
+        echo -ne "$(git repo-name)"
+    else
+        echo -ne "$(pwd)"
+    fi
     echo -ne " | ${current_command/%\ */}"
     echo -ne " …"
     echo -ne "\007"
