@@ -175,7 +175,7 @@ function set_terminal_title_preexec {
         echo -ne "$(pwd)"
     fi
     echo -ne " | ${current_command/%\ */}"
-    echo -ne " …"
+    echo -ne " ⧗"
     echo -ne "\007"
 }
 
