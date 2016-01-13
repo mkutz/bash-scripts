@@ -23,20 +23,23 @@ function git_prompt_status {
         git_dirty=""
     fi
 
-    local git_stashed_changes=$(git stash list | wc -l)
-
-    local git_commits_ahead=$(git rev-list @{u}.. --count)
-    local git_commits_behind=$(git rev-list ..@{u} --count)
-
     echo -en "${git_branch}${git_dirty} "
-    if [ ${git_commits_ahead} -gt 0 ]; then
-        echo -en "↗${git_commits_ahead} "
-    fi
-    if [ ${git_commits_behind} -gt 0 ]; then
-        echo -en "↘${git_commits_behind} "
-    fi
-    if [ ${git_stashed_changes} -gt 0 ]; then
-        echo -en "⇣${git_stashed_changes}"
+
+    if [[ "$branch" != 'detached*' ]]; then
+        local git_stashed_changes=$(git stash list | wc -l)
+
+        local git_commits_ahead=$(git rev-list @{u}.. --count)
+        local git_commits_behind=$(git rev-list ..@{u} --count)
+
+        if [ ${git_commits_ahead} -gt 0 ]; then
+            echo -en "↗${git_commits_ahead} "
+        fi
+        if [ ${git_commits_behind} -gt 0 ]; then
+            echo -en "↘${git_commits_behind} "
+        fi
+        if [ ${git_stashed_changes} -gt 0 ]; then
+            echo -en "⇣${git_stashed_changes}"
+        fi
     fi
 }
 
