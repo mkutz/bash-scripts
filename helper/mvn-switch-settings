@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #
 # switches your maven settings.xml files using a _postfix as parameter

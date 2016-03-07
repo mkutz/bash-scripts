@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #
 # prints one line of useful information about the state of the git repository in the current working directory (if any)
@@ -23,22 +23,26 @@ function git_prompt_status {
         git_dirty=""
     fi
 
-    echo -en "${git_branch}${git_dirty} "
+    echo -en "${git_branch}${git_dirty}"
 
     if [[ "$branch" != 'detached*' ]]; then
         local git_stashed_changes=$(git stash list | wc -l)
 
-        local git_commits_ahead=$(git rev-list @{u}.. --count)
-        local git_commits_behind=$(git rev-list ..@{u} --count)
+        if $(git branch -r | grep ${git_branch}); then
+          local git_commits_ahead=$(git rev-list @{u}.. --count)
+          local git_commits_behind=$(git rev-list ..@{u} --count)
 
-        if [ ${git_commits_ahead} -gt 0 ]; then
-            echo -en "↗${git_commits_ahead} "
-        fi
-        if [ ${git_commits_behind} -gt 0 ]; then
-            echo -en "↘${git_commits_behind} "
-        fi
-        if [ ${git_stashed_changes} -gt 0 ]; then
-            echo -en "⇣${git_stashed_changes}"
+          if [ ${git_commits_ahead} -gt 0 ]; then
+              echo -en "↗${git_commits_ahead}"
+          fi
+          if [ ${git_commits_behind} -gt 0 ]; then
+              echo -en "↘${git_commits_behind}"
+          fi
+          if [ ${git_stashed_changes} -gt 0 ]; then
+              echo -en "⇣${git_stashed_changes}"
+          fi
+        else
+          echo -en "↗"
         fi
     fi
 }

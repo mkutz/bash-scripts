@@ -1,5 +1,10 @@
 set show-all-if-ambiguous on
 set completion-ignore-case on
+set bell-style visible
+set output-meta on
+
+set page-completions on
+set print-completions-horizontally on
 
 "\e[A": history-search-backward # ↑
 "\e[B": history-search-forward  # ↓

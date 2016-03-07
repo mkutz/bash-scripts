@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+#
+# returns 0 if the current working director is dirty or not a git repoll
+#
+
+status=$(git status --porcelain 2> /dev/null)
+if [[ "$status" != "" ]]; then
+    exit 0
+else
+    exit 1
+fi
