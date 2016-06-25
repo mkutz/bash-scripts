@@ -96,3 +96,6 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+fpath=(~/.zsh/completion $fpath)
+autoload -Uz compinit && compinit -i

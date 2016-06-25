@@ -27,7 +27,7 @@ function git_prompt_status {
 
     if [[ "$branch" != 'detached*' ]]; then
         local git_stashed_changes=$(git stash list | wc -l)
-        local git_tracked_branch=$(git branch -r | grep --quiet ${git_branch} | wc -l)
+        local git_tracked_branch=$(git branch -r | grep ${branch} | wc -l)
 
         if [ ${git_tracked_branch} -gt 0 ]; then
           local git_commits_ahead=$(git rev-list @{u}.. --count)
@@ -43,7 +43,7 @@ function git_prompt_status {
               echo -en "⇣${git_stashed_changes}"
           fi
         else
-          echo -en "↗"
+          echo -en ""
         fi
     fi
 }
